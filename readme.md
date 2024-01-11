@@ -8,6 +8,7 @@ A custom build web framework to use for building applications with, consisting o
 - Event listner support
 - Parceljs handler
 - Typescript support
+- Axios library
 
 ### Goals
 
@@ -28,3 +29,7 @@ A custom build web framework to use for building applications with, consisting o
 1.
 2.
 3.
+
+### Jakob Douglas 2024
+
+Feel free to use this project for learning purposes

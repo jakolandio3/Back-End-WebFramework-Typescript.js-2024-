@@ -4,8 +4,15 @@
   "description": "A back-end framework build using typescript",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:parcel": "rm -rf .parcel-cache && parcel index.html",
+    "start:db": "json-server -w ./db.json",
+    "start": "concurrently npm:start:*"
   },
   "author": "Jakob Douglas",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.5",
+    "concurrently": "^8.2.2",
+    "json-server": "^1.0.0-alpha.16"
+  }
 }
