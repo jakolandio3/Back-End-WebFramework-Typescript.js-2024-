@@ -124,12 +124,17 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.User = void 0;
+//making a lot of these properties optional means we can allow empty classes to be made and assign these values later
 var User = /** @class */function () {
   function User(data) {
     this.data = data;
   }
   User.prototype.get = function (propName) {
     return this.data[propName];
+  };
+  User.prototype.set = function (updateProp) {
+    //Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
+    Object.assign(this.data, updateProp);
   };
   return User;
 }();
@@ -144,6 +149,12 @@ var User_1 = require("./models/User");
 var Jakob = new User_1.User({
   name: 'jakob',
   age: 28
+});
+Jakob.set({
+  name: 'jakos'
+});
+Jakob.set({
+  age: 68
 });
 console.log(Jakob.get('name'));
 console.log(Jakob.get('age'));
@@ -172,7 +183,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57935" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "58939" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
