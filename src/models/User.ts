@@ -1,47 +1,52 @@
-interface UserProps {
+import { AxiosResponse } from 'axios';
+import { Attributes } from './Attributes';
+import { Callback, Eventing } from './Eventing';
+import { Sync } from './Sync';
+export interface UserProps {
 	name?: string;
 	age?: number;
+	id?: string | number;
 	//here im making the props optional in the object so you can change one item
 }
 
-type Callback = () => void;
-// setting up a type alias so it doesnt get too confusing in the code
-
+const DATABASE = ' http://localhost:3000/users';
 //making a lot of these properties optional means we can allow empty classes to be made and assign these values later
 
 export class User {
-	//adding a property for the events
-	events: { [key: string]: Callback[] } = {};
-	// this is just stating that the keys are unknown on creation but guarantee they will be strings and will always point to an array of callbacks
+	//hardcoding the eventing library because theres not really a need to swap it out and it abstracts some of the logic and uses some good composition
+	public events: Eventing = new Eventing();
+	public sync: Sync<UserProps> = new Sync(DATABASE);
+	public attributes: Attributes<UserProps>;
 
-	constructor(private data: UserProps) {}
-
-	get(propName: string): number | string {
-		return this.data[propName];
+	constructor(attrs: UserProps) {
+		this.attributes = new Attributes<UserProps>(attrs);
+	}
+	// calling some delegation methods here
+	get get() {
+		return this.attributes.get;
 	}
 
-	set(updateProp: UserProps): void {
-		//Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
-		Object.assign(this.data, updateProp);
+	get on() {
+		//the getter wont call the function here so it returns a reference so you can call it.. it drags up the class from the child
+		return this.events.on;
 	}
 
-	//this will be a list of events to call on render/change/update
-	on(eventName: string, callback: Callback): void {
-		const handlers = this.events[eventName] || [];
-		handlers.push(callback);
-		this.events[eventName] = handlers;
-		//take the array at the event name key and push the new array or create one
+	get trigger() {
+		return this.events.trigger;
 	}
 
-	// adding the event listners to desired type
-	trigger(eventName: string): void {
-		// this.events[eventName]?.map((event) => event()); this is my initial way
-		const handlers = this.events[eventName];
+	set(update: UserProps): void {
+		this.attributes.set(update);
+		this.events.trigger('change');
+	}
 
-		if (!handlers || handlers.length === 0) {
-			return;
+	fetch(): void {
+		const id = this.get('id');
+		if (typeof id !== 'string') {
+			throw new Error('Can"t fetch data without an id defined');
 		}
-		handlers.forEach((callback) => callback());
-		//essentially my code did the same without assigning the variable to handlers
+		this.sync.fetch(id).then((response: AxiosResponse): void => {
+			this.set(response.data);
+		});
 	}
 }
