@@ -16,4 +16,8 @@ export class Attributes<T extends {}> {
 		//Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
 		Object.assign(this.data, updateProp);
 	}
+
+	getAll(): T {
+		return this.data;
+	}
 }

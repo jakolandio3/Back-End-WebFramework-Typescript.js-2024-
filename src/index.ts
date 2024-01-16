@@ -1,10 +1,11 @@
 import { User } from './models/User';
 
-const user = new User({ id: 'd315' });
+const user = new User({ id: 'd315', name: 'newer name', age: 0 });
 console.log(user);
 
-user.on('change', () => {
-	console.log('change worked');
+user.on('save', () => {
+	console.log('save worked');
 });
 
-user.fetch();
+user.save();
+// remember the id is now a string because axios has changed so just fix that through the course

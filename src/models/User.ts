@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 import { Attributes } from './Attributes';
-import { Callback, Eventing } from './Eventing';
+import { Eventing } from './Eventing';
 import { Sync } from './Sync';
 export interface UserProps {
 	name?: string;
@@ -48,5 +48,13 @@ export class User {
 		this.sync.fetch(id).then((response: AxiosResponse): void => {
 			this.set(response.data);
 		});
+	}
+
+	save(): void {
+		this.sync
+			.save(this.attributes.getAll())
+			.then((response: AxiosResponse): void => {
+				this.trigger('save');
+			});
 	}
 }

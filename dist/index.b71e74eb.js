@@ -581,13 +581,15 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 },{}],"h7u1C":[function(require,module,exports) {
 var _user = require("./models/User");
 const user = new (0, _user.User)({
-    id: "d315"
+    id: "d315",
+    name: "newer name",
+    age: 0
 });
 console.log(user);
-user.on("change", ()=>{
-    console.log("change worked");
+user.on("save", ()=>{
+    console.log("save worked");
 });
-user.fetch();
+user.save(); // remember the id is now a string because axios has changed so just fix that through the course
 
 },{"./models/User":"4rcHn"}],"4rcHn":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -627,6 +629,11 @@ class User {
             this.set(response.data);
         });
     }
+    save() {
+        this.sync.save(this.attributes.getAll()).then((response)=>{
+            this.trigger("save");
+        });
+    }
 }
 
 },{"./Attributes":"6Bbds","./Eventing":"7459s","./Sync":"QO3Gl","@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"6Bbds":[function(require,module,exports) {
@@ -647,6 +654,9 @@ class Attributes {
     set(updateProp) {
         //Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
         Object.assign(this.data, updateProp);
+    }
+    getAll() {
+        return this.data;
     }
 }
 
