@@ -5,7 +5,7 @@ interface ModelAttributes<T> {
 	getAll(): T;
 	get<K extends keyof T>(key: K): T[K];
 }
-interface HasId {
+export interface HasId {
 	id?: string | number;
 }
 
