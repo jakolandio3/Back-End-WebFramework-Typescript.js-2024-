@@ -10,7 +10,7 @@ interface HasId {
 }
 
 interface Sync<T> {
-	fetch(id: number): AxiosPromise;
+	fetch(id: string): AxiosPromise;
 	save(data: T): AxiosPromise;
 }
 
