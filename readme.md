@@ -5,8 +5,8 @@ A custom build web framework to use for building applications with, consisting o
 ## consisting Of
 
 - Json dev server
-- Event listner support
-- Parceljs handler
+- Event listener support
+- Parcel.js handler
 - Typescript support
 - Axios library
 
@@ -20,15 +20,15 @@ A custom build web framework to use for building applications with, consisting o
 
 ## Commands List
 
-1.
-2.
-3.
+1."start:parcel":"rm -rf .parcel-cache && parcel index.html"  
+2."start:db": "json-server -w ./db.json",
+3."start": "concurrently npm:start:\*"
 
 ## Getting Started
 
-1.
-2.
-3.
+1. npm I (install dependencies)
+2. npm run start (runs both json server on localhost:3000 and parcel)
+3. start working on your project (look through models folder to see how to create new objects easily and change default variables)
 
 ### Jakob Douglas 2024
 
