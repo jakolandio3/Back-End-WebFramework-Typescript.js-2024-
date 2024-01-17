@@ -580,43 +580,45 @@ function hmrAccept(bundle /*: ParcelRequire */ , id /*: string */ ) {
 
 },{}],"h7u1C":[function(require,module,exports) {
 var _user = require("./models/User");
-const user = new (0, _user.User)({
-    id: "d315",
-    name: "newer name",
-    age: 0
-});
-console.log(user);
-user.on("save", ()=>{
-    console.log("save worked");
-});
-user.save(); // remember the id is now a string because axios has changed so just fix that through the course
+const collection = (0, _user.User).buildUserCollection();
+collection.on("change", ()=>console.log(collection));
+collection.fetch();
 
 },{"./models/User":"4rcHn"}],"4rcHn":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 //making a lot of these properties optional means we can allow empty classes to be made and assign these values later
 parcelHelpers.export(exports, "User", ()=>User);
+var _model = require("./Model");
 var _attributes = require("./Attributes");
 var _eventing = require("./Eventing");
-var _sync = require("./Sync");
+var _apisync = require("./Apisync");
+var _collection = require("./Collection");
 const DATABASE = " http://localhost:3000/users";
-class User {
-    constructor(attrs){
-        //hardcoding the eventing library because theres not really a need to swap it out and it abstracts some of the logic and uses some good composition
-        this.events = new (0, _eventing.Eventing)();
-        this.sync = new (0, _sync.Sync)(DATABASE);
-        this.attributes = new (0, _attributes.Attributes)(attrs);
+class User extends (0, _model.Model) {
+    //creating a static class method here for a pre-configured environment
+    static buildUser(attrs) {
+        return new User(new (0, _attributes.Attributes)(attrs), new (0, _eventing.Eventing)(), new (0, _apisync.ApiSync)(DATABASE));
     }
-    // calling some delegation methods here
-    get get() {
-        return this.attributes.get;
+    static buildUserCollection() {
+        return new (0, _collection.Collection)(DATABASE, (json)=>User.buildUser(json));
     }
-    get on() {
-        //the getter wont call the function here so it returns a reference so you can call it.. it drags up the class from the child
-        return this.events.on;
-    }
-    get trigger() {
-        return this.events.trigger;
+}
+
+},{"./Model":"f033k","./Attributes":"6Bbds","./Eventing":"7459s","./Apisync":"cCWX6","@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS","./Collection":"dD11O"}],"f033k":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Model", ()=>Model);
+class Model {
+    constructor(attributes, events, sync){
+        this.attributes = attributes;
+        this.events = events;
+        this.sync = sync;
+        this.// calling some delegation methods here
+        //you can only call this because we defined the variables in the constructor
+        on = this.events.on;
+        this.trigger = this.events.trigger;
+        this.get = this.attributes.get;
     }
     set(update) {
         this.attributes.set(update);
@@ -633,30 +635,6 @@ class User {
         this.sync.save(this.attributes.getAll()).then((response)=>{
             this.trigger("save");
         });
-    }
-}
-
-},{"./Attributes":"6Bbds","./Eventing":"7459s","./Sync":"QO3Gl","@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"6Bbds":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-//there was some error handling here so I had to tell TS that attributes will always pass an object type check
-parcelHelpers.export(exports, "Attributes", ()=>Attributes);
-class Attributes {
-    constructor(data){
-        this.data = data;
-        this.//changed this to an arrow function as it binds this to it
-        get = (key)=>{
-            return this.data[key];
-        };
-    }
-    //t here represents the type passed in which is an interface and k represents a key in that interface object, now typescript knows what this key type will be it can give us all the attributes associated with that type upon returning it
-    //this means we can only ever call get with the strings of the keys we define in the type configuration
-    set(updateProp) {
-        //Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
-        Object.assign(this.data, updateProp);
-    }
-    getAll() {
-        return this.data;
     }
 }
 
@@ -690,7 +668,31 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"7459s":[function(require,module,exports) {
+},{}],"6Bbds":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+//there was some error handling here so I had to tell TS that attributes will always pass an object type check
+parcelHelpers.export(exports, "Attributes", ()=>Attributes);
+class Attributes {
+    constructor(data){
+        this.data = data;
+        this.//changed this to an arrow function as it binds this to it
+        get = (key)=>{
+            return this.data[key];
+        };
+    }
+    //t here represents the type passed in which is an interface and k represents a key in that interface object, now typescript knows what this key type will be it can give us all the attributes associated with that type upon returning it
+    //this means we can only ever call get with the strings of the keys we define in the type configuration
+    set(updateProp) {
+        //Object assign method here copy pastes the data from the passed in argument and copy pastes it to this.data (UserProps type makes sure it is passed an object with name:str and age:num)
+        Object.assign(this.data, updateProp);
+    }
+    getAll() {
+        return this.data;
+    }
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"7459s":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 // setting up a type alias so it doesnt get too confusing in the code
@@ -718,14 +720,14 @@ class Eventing {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"QO3Gl":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"cCWX6":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 //guarantee  that the type will have a number
-parcelHelpers.export(exports, "Sync", ()=>Sync);
+parcelHelpers.export(exports, "ApiSync", ()=>ApiSync);
 var _axios = require("axios");
 var _axiosDefault = parcelHelpers.interopDefault(_axios);
-class Sync {
+class ApiSync {
     constructor(rootUrl){
         this.rootUrl = rootUrl;
     }
@@ -5114,6 +5116,38 @@ Object.entries(HttpStatusCode).forEach(([key, value])=>{
 });
 exports.default = HttpStatusCode;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}]},["i0mmI","h7u1C"], "h7u1C", "parcelRequirea763")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}],"dD11O":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Collection", ()=>Collection);
+var _eventing = require("./Eventing");
+var _axios = require("axios");
+var _axiosDefault = parcelHelpers.interopDefault(_axios);
+class Collection {
+    //we have to use a getter here because of the callstack
+    constructor(rootUrl, deserialize){
+        this.rootUrl = rootUrl;
+        this.deserialize = deserialize;
+        this.//specifying two generic arguments here, one for the models structure and one for the object data we expect to get back from the fetch
+        models = [];
+        this.events = new (0, _eventing.Eventing)();
+    }
+    get on() {
+        return this.events.on;
+    }
+    get trigger() {
+        return this.events.trigger;
+    }
+    fetch() {
+        (0, _axiosDefault.default).get(this.rootUrl).then((res)=>{
+            res.data.forEach((value)=>{
+                this.models.push(this.deserialize(value));
+            });
+            this.trigger("change");
+        });
+    }
+}
+
+},{"./Eventing":"7459s","axios":"jo6P5","@parcel/transformer-js/src/esmodule-helpers.js":"2wRDS"}]},["i0mmI","h7u1C"], "h7u1C", "parcelRequirea763")
 
 //# sourceMappingURL=index.b71e74eb.js.map
